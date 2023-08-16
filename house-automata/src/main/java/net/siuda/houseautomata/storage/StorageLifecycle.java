@@ -1,7 +1,6 @@
 package net.siuda.houseautomata.storage;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.ContextClosedEvent;
@@ -12,9 +11,8 @@ import org.springframework.stereotype.Service;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
+@Slf4j
 public class StorageLifecycle {
-
-    private static final Logger LOG = LoggerFactory.getLogger(StorageLifecycle.class);
 
     @Autowired
     YamlStorageService storageService;
@@ -24,16 +22,16 @@ public class StorageLifecycle {
     @EventListener(ContextClosedEvent.class)
     public void shutdown() {
         if(!failed.getAndSet(true)) {
-            LOG.info("Saving state before shutdown");
+            log.info("Saving state before shutdown");
             storageService.save();
         } else {
-            LOG.info("State not saved due to startup failure");
+            log.info("State not saved due to startup failure");
         }
     }
 
     @EventListener(ApplicationStartedEvent.class)
     public void startup() {
-        LOG.info("Restoring state after startup");
+        log.info("Restoring state after startup");
         storageService.load();
         failed.set(false);
     }
@@ -41,7 +39,7 @@ public class StorageLifecycle {
     @Scheduled(fixedDelayString = "${storage.interval}", initialDelayString = "${storage.delay}")
     public void timer() {
         if(!failed.get()) {
-            LOG.info("Saving state");
+            log.info("Saving state");
             storageService.save();
         }
     }

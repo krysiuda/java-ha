@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class AtomicMetricList {
 
-    private AtomicReference<AtomicMetricListElement> head = new AtomicReference<>(null);
+    private final AtomicReference<AtomicMetricListElement> head = new AtomicReference<>(null);
 
     public IntMetric first() {
         return head.get() != null ? head.get().value : null;
@@ -17,9 +17,8 @@ public class AtomicMetricList {
     public List<IntMetric> slice(Long from, Long to) {
         List<IntMetric> result = new LinkedList<>();
         AtomicMetricListElement current = head.get();
-        for(; current != null && current.value.getTimestamp() >= to; current = current.next.get()) {
-        }
-        for(; current != null && current.value.getTimestamp() >= from; current = current.next.get()) {
+        for (; current != null && current.value.getTimestamp() >= to; current = current.next.get());
+        for (; current != null && current.value.getTimestamp() >= from; current = current.next.get()) {
             result.add(current.value);
         }
         return result;
@@ -42,10 +41,12 @@ public class AtomicMetricList {
     public List<IntMetric> split(Long timestamp) {
         List<IntMetric> result = new LinkedList<>();
         AtomicMetricListElement current = head.get();
-        for(; current != null && current.value.getTimestamp() > timestamp; current = current.next.get());
-        current = current.next.getAndSet(null);
-        for(; current != null; current = current.next.get()) {
-            result.add(current.value);
+        if (current != null && current.next != null) {
+            for (; current.next != null && current.value.getTimestamp() > timestamp; current = current.next.get()) ;
+            current = current.next.getAndSet(null);
+            for (; current != null; current = current.next.get()) {
+                result.add(current.value);
+            }
         }
         return result;
     }

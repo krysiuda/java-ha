@@ -1,9 +1,13 @@
 package net.siuda.houseautomata.controller;
 
-import net.siuda.houseautomata.model.*;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
+import net.siuda.houseautomata.auth.AuthService;
+import net.siuda.houseautomata.model.Toggle;
+import net.siuda.houseautomata.model.ToggleValue;
+import net.siuda.houseautomata.model.Toggles;
 import net.siuda.houseautomata.state.AtomicToggle;
 import net.siuda.houseautomata.state.TogglesRepo;
-import net.siuda.houseautomata.token.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,19 +21,19 @@ import java.util.HashMap;
 public class TogglesController {
 
     @Autowired
-    private TogglesRepo togglesState;
+    TogglesRepo togglesState;
 
     @Autowired
-    TokenService tokenService;
-
-    @Autowired
-    private ClientId clientId;
+    AuthService authService;
 
     @PutMapping(path = "/{toggle}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @SecurityRequirements({
+            @SecurityRequirement(name = DefinedSecuritySchemes.KEY),
+            @SecurityRequirement(name = DefinedSecuritySchemes.TOKEN)
+    })
     public ResponseEntity<Toggle> toggle(@PathVariable Toggles toggle,
-                                         @RequestHeader(value = "api-token", required = false) String token,
                                          @RequestBody ToggleValue value) {
-        tokenService.verifyToken(new Token(token), clientId);
+        authService.assertAuth();
         AtomicToggle toggleState = togglesState.getState(toggle);
         Toggle oldValue = toggleState.getValue();
         if(!oldValue.getValue().equals(value.getValue())) {

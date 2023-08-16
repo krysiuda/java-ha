@@ -1,1 +1,11 @@
+ ______
+< meow >
+ ------
+  \
+   \
+      /\_)o<
+     |      \
+     | o . o|
+      \_____/
+
 ${application.title} ${application.version}

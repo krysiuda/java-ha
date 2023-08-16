@@ -1,4 +1,4 @@
-package net.siuda.houseautomata.token;
+package net.siuda.houseautomata.auth;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
